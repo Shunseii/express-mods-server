@@ -7,6 +7,7 @@ import { buildSchema } from "type-graphql";
 import redis from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
+import cors from "cors";
 
 import { UserResolver } from "./resolvers/user.resolvers";
 import { PostResolver } from "./resolvers/post.resolvers";
@@ -16,6 +17,7 @@ import {
   COOKIE_NAME,
   COOKIE_MAX_AGE,
   COOKIE_SECRET,
+  FRONT_END_URL,
 } from "./constants";
 import { Context } from "./types";
 
@@ -25,6 +27,13 @@ import { Context } from "./types";
   const app = express();
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
+
+  app.use(
+    cors({
+      credentials: true,
+      origin: FRONT_END_URL,
+    })
+  );
 
   app.use(
     session({
@@ -57,6 +66,7 @@ import { Context } from "./types";
 
   apolloServer.applyMiddleware({
     app,
+    cors: false,
   });
 
   app.listen(PORT, () => {
