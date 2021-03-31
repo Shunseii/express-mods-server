@@ -9,7 +9,7 @@ import {
 import { User } from "../entities/User";
 
 @ValidatorConstraint({ async: true })
-export class IsUserFieldInUseConstraint
+export class IsUserFieldNotInUseConstraint
   implements ValidatorConstraintInterface {
   validate(fieldValue: string, args: ValidationArguments) {
     return User.findOne({ where: { [args.property]: fieldValue } }).then(
@@ -22,18 +22,18 @@ export class IsUserFieldInUseConstraint
   }
 
   defaultMessage(args: ValidationArguments) {
-    return "This $property is already in use.";
+    return "This $property already exists.";
   }
 }
 
-export function IsUserFieldInUse(validationOptions?: ValidationOptions) {
+export function IsUserFieldNotInUse(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
-      validator: IsUserFieldInUseConstraint,
+      validator: IsUserFieldNotInUseConstraint,
     });
   };
 }
