@@ -1,34 +1,36 @@
 import { Field, InputType, Int } from "type-graphql";
 import { IsEmail, MinLength, Length } from "class-validator";
-import { IsUserFieldInUse } from "../decorators/IsUserFieldInUse";
-import { IsPostFieldInUse } from "../decorators/IsPostFieldInUse";
+
+import { IsUserFieldNotInUse } from "../decorators/IsUserFieldNotInUse";
+import { IsPostFieldNotInUse } from "../decorators/IsPostFieldNotInUse";
+import { INVALID_EMAIL, INVALID_LENGTH, TOO_SHORT } from "./messages";
 
 @InputType()
 export class RegisterUserInput {
   @Field()
-  @IsEmail()
-  @IsUserFieldInUse()
+  @IsEmail({}, { message: INVALID_EMAIL })
+  @IsUserFieldNotInUse()
   email!: string;
 
   @Field()
-  @IsUserFieldInUse()
-  @MinLength(2)
+  @IsUserFieldNotInUse()
+  @MinLength(2, { message: TOO_SHORT })
   username!: string;
 
   @Field()
-  @MinLength(6)
+  @MinLength(6, { message: TOO_SHORT })
   password!: string;
 }
 
 @InputType()
 export class CreatePostInput {
   @Field()
-  @IsPostFieldInUse()
-  @Length(4, 255)
+  @IsPostFieldNotInUse()
+  @Length(4, 255, { message: INVALID_LENGTH })
   title!: string;
 
   @Field({ nullable: true })
-  @MinLength(16)
+  @MinLength(16, { message: TOO_SHORT })
   content?: string;
 }
 
@@ -38,11 +40,11 @@ export class UpdatePostInput {
   id!: number;
 
   @Field({ nullable: true })
-  @IsPostFieldInUse()
-  @Length(4, 255)
+  @IsPostFieldNotInUse()
+  @Length(4, 255, { message: INVALID_LENGTH })
   title?: string;
 
   @Field({ nullable: true })
-  @MinLength(16)
+  @MinLength(16, { message: TOO_SHORT })
   content?: string;
 }
