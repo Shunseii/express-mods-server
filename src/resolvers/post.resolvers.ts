@@ -6,30 +6,26 @@ import { CreatePostInput, UpdatePostInput } from "./types";
 export class PostResolver {
   @Query(() => [Post])
   posts(): Promise<Post[]> {
-    return Post.find({});
+    return Post.find();
   }
 
   @Query(() => Post, { nullable: true })
   post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    return Post.findOne({ where: { id } });
+    return Post.findOne(id);
   }
 
   @Mutation(() => Post)
   async createPost(
     @Arg("options") { title, content }: CreatePostInput
   ): Promise<Post> {
-    const post = Post.create({ title, content });
-
-    await Post.save(post);
-
-    return post;
+    return Post.create({ title, content }).save();
   }
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
     @Arg("options") { id, title, content }: UpdatePostInput
   ): Promise<Post | undefined> {
-    const post = await Post.findOne({ where: { id } });
+    const post = await Post.findOne(id);
 
     if (!post) return undefined;
 
@@ -41,16 +37,9 @@ export class PostResolver {
     return post;
   }
 
-  @Mutation(() => Post, { nullable: true })
-  async deletePost(
-    @Arg("id", () => Int) id: number
-  ): Promise<Post | undefined> {
-    const post = await Post.findOne({ where: { id } });
-
-    if (!post) return undefined;
-
+  @Mutation(() => Boolean)
+  async deletePost(@Arg("id", () => Int) id: number): Promise<boolean> {
     await Post.delete(id);
-
-    return post;
+    return true;
   }
 }

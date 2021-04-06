@@ -23,6 +23,23 @@ export class RegisterUserInput {
 }
 
 @InputType()
+export class ChangePasswordInput {
+  @Field()
+  token!: string;
+
+  @Field()
+  @MinLength(6, { message: TOO_SHORT })
+  newPassword!: string;
+}
+
+@InputType()
+export class ForgotPasswordInput {
+  @Field()
+  @IsEmail({}, { message: INVALID_EMAIL })
+  email!: string;
+}
+
+@InputType()
 export class CreatePostInput {
   @Field()
   @IsPostFieldNotInUse()

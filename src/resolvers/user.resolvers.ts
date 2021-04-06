@@ -1,18 +1,75 @@
 import { Query, Resolver, Mutation, Arg, Ctx } from "type-graphql";
 import argon2 from "argon2";
+import { v4 } from "uuid";
 
 import { User } from "../entities/User";
-import { RegisterUserInput } from "./types";
+import {
+  ChangePasswordInput,
+  ForgotPasswordInput,
+  RegisterUserInput,
+} from "./types";
 import { Context } from "../types";
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
+import sendEmail from "../utils/sendEmail";
 
 @Resolver()
 export class UserResolver {
   @Query(() => User, { nullable: true })
-  async me(@Ctx() { req }: Context): Promise<User | undefined> {
+  me(@Ctx() { req }: Context) {
     if (!req.session.userId) return undefined;
 
-    return await User.findOne({ where: { id: req.session.userId } });
+    return User.findOne(req.session.userId);
+  }
+
+  @Mutation(() => User, { nullable: true })
+  async changePassword(
+    @Arg("options") { token, newPassword }: ChangePasswordInput,
+    @Ctx() { req, redis }: Context
+  ): Promise<User | undefined> {
+    const key = FORGOT_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
+    if (!userId) return undefined;
+
+    const userIdInt = parseInt(userId);
+    const user = await User.findOne(userIdInt);
+    if (!user) return undefined;
+
+    User.update(
+      { id: userIdInt },
+      { password: await argon2.hash(newPassword) }
+    );
+
+    await redis.del(key);
+    req.session.userId = user.id;
+
+    return user;
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg("options") { email }: ForgotPasswordInput,
+    @Ctx() { redis }: Context
+  ): Promise<boolean> {
+    const user = await User.findOne({ where: { email } });
+    const token = v4();
+
+    if (!user) return true;
+
+    await redis.set(
+      FORGOT_PASSWORD_PREFIX + token,
+      user.id,
+      "ex",
+      1000 * 60 * 60 * 24 * 3
+    ); // 3 days
+
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">
+        Click here to change your password
+      </a>`
+    );
+
+    return true;
   }
 
   @Mutation(() => User)
@@ -21,9 +78,11 @@ export class UserResolver {
     @Ctx() { req }: Context
   ): Promise<User> {
     const hashedPassword = await argon2.hash(password);
-    const user = User.create({ username, email, password: hashedPassword });
-
-    await User.save(user);
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+    }).save();
 
     req.session.userId = user.id;
 
@@ -37,11 +96,9 @@ export class UserResolver {
     @Ctx() { req }: Context
   ): Promise<User | undefined> {
     const user = await User.findOne({ where: { username } });
-
     if (!user) return undefined;
 
-    const valid = argon2.verify(user.password, password);
-
+    const valid = await argon2.verify(user.password, password);
     if (!valid) return undefined;
 
     req.session.userId = user.id;

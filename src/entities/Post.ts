@@ -24,7 +24,7 @@ export class Post extends BaseEntity {
   updatedAt: Date;
 
   @Field()
-  @Column("text", { unique: true })
+  @Column({ unique: true })
   title!: string;
 
   @Field({ nullable: true })
