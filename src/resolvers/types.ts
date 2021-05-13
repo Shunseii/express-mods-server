@@ -1,9 +1,19 @@
-import { Field, InputType, Int } from "type-graphql";
+import { Field, InputType, Int, ObjectType } from "type-graphql";
 import { IsEmail, MinLength, Length } from "class-validator";
 
 import { IsUserFieldNotInUse } from "../decorators/IsUserFieldNotInUse";
-import { IsPostFieldNotInUse } from "../decorators/IsPostFieldNotInUse";
+import { IsModFieldNotInUse } from "../decorators/IsModFieldNotInUse";
 import { INVALID_EMAIL, INVALID_LENGTH, TOO_SHORT } from "./messages";
+import { Mod } from "../entities/Mod";
+
+@ObjectType()
+export class PaginatedMods {
+  @Field(() => [Mod])
+  mods: Mod[];
+
+  @Field()
+  hasMore: boolean;
+}
 
 @InputType()
 export class RegisterUserInput {
@@ -40,24 +50,25 @@ export class ForgotPasswordInput {
 }
 
 @InputType()
-export class CreatePostInput {
+export class CreateModInput {
   @Field()
-  @IsPostFieldNotInUse()
   @Length(4, 255, { message: INVALID_LENGTH })
   title!: string;
 
-  @Field({ nullable: true })
+  @Field()
   @MinLength(16, { message: TOO_SHORT })
-  content?: string;
+  content!: string;
+
+  @Field()
+  gameSlug!: string;
 }
 
 @InputType()
-export class UpdatePostInput {
+export class UpdateModInput {
   @Field(() => Int)
   id!: number;
 
   @Field({ nullable: true })
-  @IsPostFieldNotInUse()
   @Length(4, 255, { message: INVALID_LENGTH })
   title?: string;
 
