@@ -6,7 +6,10 @@ import {
   BaseEntity,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
+  ManyToMany,
 } from "typeorm";
+import { Mod } from "./Mod";
 
 @ObjectType()
 @Entity("users")
@@ -16,12 +19,12 @@ export class User extends BaseEntity {
   id!: number;
 
   @Field()
-  @CreateDateColumn()
-  createdAt: Date;
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
 
   @Field()
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 
   @Field()
   @Column({ unique: true })
@@ -33,4 +36,12 @@ export class User extends BaseEntity {
 
   @Column()
   password!: string;
+
+  @Field(() => [Mod])
+  @OneToMany(() => Mod, (mod) => mod.author)
+  mods?: Mod[];
+
+  @Field(() => [Mod])
+  @ManyToMany(() => Mod, (mod) => mod.likes)
+  likedMods?: Mod[];
 }
