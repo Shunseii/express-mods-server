@@ -10,7 +10,7 @@ import connectRedis from "connect-redis";
 import cors from "cors";
 
 import { UserResolver } from "./resolvers/user.resolvers";
-import { PostResolver } from "./resolvers/post.resolvers";
+import { ModResolver } from "./resolvers/mod.resolvers";
 import {
   IS_PROD,
   PORT,
@@ -20,9 +20,12 @@ import {
   FRONT_END_URL,
 } from "./constants";
 import { Context } from "./types";
+import authChecker from "./auth/authChecker";
+import { GameResolver } from "./resolvers/game.resolvers";
 
 (async () => {
-  await createConnection();
+  const conn = await createConnection();
+  await conn.runMigrations();
 
   const app = express();
   const RedisStore = connectRedis(session);
@@ -55,7 +58,8 @@ import { Context } from "./types";
   );
 
   const schema = await buildSchema({
-    resolvers: [UserResolver, PostResolver],
+    resolvers: [UserResolver, ModResolver, GameResolver],
+    authChecker,
     emitSchemaFile: true,
   });
 
