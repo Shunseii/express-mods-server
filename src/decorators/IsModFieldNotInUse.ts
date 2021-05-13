@@ -6,15 +6,15 @@ import {
   ValidatorConstraintInterface,
 } from "class-validator";
 
-import { Post } from "../entities/Post";
+import { Mod } from "../entities/Mod";
 
 @ValidatorConstraint({ async: true })
-export class IsPostFieldNotInUseConstraint
+export class IsModFieldNotInUseConstraint
   implements ValidatorConstraintInterface {
   validate(fieldValue: string, args: ValidationArguments) {
-    return Post.findOne({ where: { [args.property]: fieldValue } }).then(
-      (post) => {
-        if (post) return false;
+    return Mod.findOne({ where: { [args.property]: fieldValue } }).then(
+      (mod) => {
+        if (mod) return false;
 
         return true;
       }
@@ -26,14 +26,14 @@ export class IsPostFieldNotInUseConstraint
   }
 }
 
-export function IsPostFieldNotInUse(validationOptions?: ValidationOptions) {
+export function IsModFieldNotInUse(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
-      validator: IsPostFieldNotInUseConstraint,
+      validator: IsModFieldNotInUseConstraint,
     });
   };
 }
