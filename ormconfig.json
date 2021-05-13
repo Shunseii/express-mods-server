@@ -7,5 +7,9 @@
   "database": "express-mods",
   "synchronize": true,
   "logging": false,
-  "entities": ["build/entities/**/*.*"]
+  "entities": ["build/entities/**/*.*"],
+  "migrations": ["build/migrations/**/*.*"],
+  "cli": {
+    "migrationsDir": "src/migrations"
+  }
 }
