@@ -1,4 +1,12 @@
-import { Query, Resolver, Mutation, Arg, Ctx } from "type-graphql";
+import {
+  Query,
+  Resolver,
+  Mutation,
+  Arg,
+  Ctx,
+  FieldResolver,
+  Root,
+} from "type-graphql";
 import argon2 from "argon2";
 import { v4 } from "uuid";
 
@@ -12,13 +20,25 @@ import { Context } from "../types";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import sendEmail from "../utils/sendEmail";
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() root: User, @Ctx() { req }: Context) {
+    if (req.session.userId !== root.id) {
+      return "";
+    }
+
+    return root.email;
+  }
+
   @Query(() => User, { nullable: true })
   me(@Ctx() { req }: Context) {
     if (!req.session.userId) return undefined;
 
-    return User.findOne(req.session.userId);
+    return User.findOne({
+      where: { id: req.session.userId },
+      relations: ["likedMods", "mods"],
+    });
   }
 
   @Mutation(() => User, { nullable: true })
