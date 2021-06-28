@@ -137,13 +137,18 @@ export class ModResolver {
     }).save();
   }
 
+  @Authorized()
   @Mutation(() => Mod, { nullable: true })
   async updateMod(
-    @Arg("options") { id, title, content }: UpdateModInput
+    @Arg("options") { id, title, content }: UpdateModInput,
+    @Ctx() { req }: Context
   ): Promise<Mod | undefined> {
+    const { userId: currentUserId } = req.session;
     const mod = await Mod.findOne(id);
 
     if (!mod) return undefined;
+
+    if (currentUserId !== mod.authorId) return undefined;
 
     if (title) mod.title = title;
     if (content) mod.content = content;
