@@ -36,7 +36,7 @@ export class Mod extends BaseEntity {
   @Column()
   content!: string;
 
-  @Field(() => [User])
+  @Field(() => [User], { nullable: true })
   @ManyToMany(() => User, (user) => user.likedMods)
   @JoinTable()
   likes?: User[];
