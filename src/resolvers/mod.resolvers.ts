@@ -158,9 +158,13 @@ export class ModResolver {
     return mod;
   }
 
+  @Authorized()
   @Mutation(() => Boolean)
-  async deleteMod(@Arg("id", () => Int) id: number): Promise<boolean> {
-    await Mod.delete(id);
+  async deleteMod(
+    @Arg("id", () => Int) id: number,
+    @Ctx() { req }: Context
+  ): Promise<boolean> {
+    await Mod.delete({ id, authorId: req.session.userId });
     return true;
   }
 }
