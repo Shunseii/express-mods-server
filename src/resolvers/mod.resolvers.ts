@@ -9,7 +9,7 @@ import {
   FieldResolver,
   Root,
 } from "type-graphql";
-import { FindConditions, ObjectLiteral, Raw } from "typeorm";
+import { Any, FindConditions, In, ObjectLiteral, Raw } from "typeorm";
 
 import { Mod } from "../entities/Mod";
 import { CreateModInput, PaginatedMods, UpdateModInput } from "./types";
@@ -30,18 +30,26 @@ export class ModResolver {
   }
 
   @FieldResolver(() => Boolean)
+  isOwner(@Root() root: Mod, @Ctx() { req }: Context): boolean {
+    return root.authorId === req.session.userId;
+  }
+
+  @FieldResolver(() => User)
+  async author(@Root() root: Mod): Promise<User> {
+    // By construction, every mod must have an author
+    // hence we are required to assert that the user exists
+    return (await User.findOne(root.authorId))!;
+  }
+
+  @FieldResolver(() => Boolean)
   hasLiked(@Root() root: Mod, @Ctx() { req }: Context): boolean {
     const { userId } = req.session;
 
     return (
-      !!root.likes!.find((userThatLiked) => userThatLiked.id === userId) ??
+      (root.likes &&
+        !!root.likes.find((userThatLiked) => userThatLiked.id === userId)) ??
       false
     );
-  }
-
-  @FieldResolver(() => Boolean)
-  isOwner(@Root() root: Mod, @Ctx() { req }: Context): boolean {
-    return root.authorId === req.session.userId;
   }
 
   @Query(() => PaginatedMods)
@@ -66,7 +74,7 @@ export class ModResolver {
     }
 
     const mods = await Mod.find({
-      relations: ["author", "likes"],
+      relations: ["likes"],
       where,
       order: { createdAt: "DESC" },
       take: realLimit + 1, // Fetch an extra mod to see if there are additional ones for subsequent calls
