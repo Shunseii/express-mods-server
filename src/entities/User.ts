@@ -7,8 +7,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  ManyToMany,
 } from "typeorm";
+
+import { Like } from "./Like";
 import { Mod } from "./Mod";
 
 @ObjectType()
@@ -37,11 +38,11 @@ export class User extends BaseEntity {
   @Column()
   password!: string;
 
-  @Field(() => [Mod])
+  @Field(() => [Mod], { nullable: true })
   @OneToMany(() => Mod, (mod) => mod.author)
   mods?: Mod[];
 
-  @Field(() => [Mod])
-  @ManyToMany(() => Mod, (mod) => mod.likes)
-  likedMods?: Mod[];
+  @Field(() => [Mod], { nullable: true })
+  @OneToMany(() => Like, (like) => like.user)
+  likedMods?: Like[];
 }

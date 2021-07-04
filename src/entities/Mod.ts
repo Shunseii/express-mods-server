@@ -7,10 +7,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  ManyToMany,
-  JoinTable,
+  OneToMany,
 } from "typeorm";
+
 import { Game } from "./Game";
+import { Like } from "./Like";
 import { User } from "./User";
 
 @ObjectType()
@@ -36,10 +37,8 @@ export class Mod extends BaseEntity {
   @Column()
   content!: string;
 
-  @Field(() => [User], { nullable: true })
-  @ManyToMany(() => User, (user) => user.likedMods)
-  @JoinTable()
-  likes?: User[];
+  @OneToMany(() => Like, (like) => like.mod)
+  likes?: Like[];
 
   @Field(() => Int)
   @Column()
