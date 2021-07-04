@@ -170,6 +170,7 @@ export class ModResolver {
     @Arg("id", () => Int) id: number,
     @Ctx() { req }: Context
   ): Promise<boolean> {
+    await Like.delete({ modId: id });
     await Mod.delete({ id, authorId: req.session.userId });
     return true;
   }
