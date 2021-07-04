@@ -9,24 +9,20 @@ import {
   FieldResolver,
   Root,
 } from "type-graphql";
-import { Any, FindConditions, In, ObjectLiteral, Raw } from "typeorm";
+import { FindConditions, ObjectLiteral, Raw } from "typeorm";
 
 import { Mod } from "../entities/Mod";
 import { CreateModInput, PaginatedMods, UpdateModInput } from "./types";
 import { Context } from "../types";
 import { Game } from "../entities/Game";
 import { User } from "../entities/User";
+import { Like } from "../entities/Like";
 
 @Resolver(Mod)
 export class ModResolver {
   @FieldResolver(() => String)
   contentSnippet(@Root() root: Mod): string {
     return root.content.slice(0, 50);
-  }
-
-  @FieldResolver(() => Int)
-  likesCount(@Root() root: Mod): number {
-    return root.likes?.length ?? 0;
   }
 
   @FieldResolver(() => Boolean)
@@ -41,15 +37,21 @@ export class ModResolver {
     return (await User.findOne(root.authorId))!;
   }
 
-  @FieldResolver(() => Boolean)
-  hasLiked(@Root() root: Mod, @Ctx() { req }: Context): boolean {
-    const { userId } = req.session;
+  @FieldResolver(() => Int)
+  async likesCount(@Root() root: Mod): Promise<number> {
+    const likes = await Like.find({ where: { modId: root.id } });
 
-    return (
-      (root.likes &&
-        !!root.likes.find((userThatLiked) => userThatLiked.id === userId)) ??
-      false
-    );
+    return likes.length;
+  }
+
+  @FieldResolver(() => Boolean)
+  async hasLiked(@Root() root: Mod, @Ctx() { req }: Context): Promise<boolean> {
+    const { userId } = req.session;
+    const { id: modId } = root;
+
+    const userHasLiked = await Like.findOne({ where: { userId, modId } });
+
+    return !!userHasLiked;
   }
 
   @Query(() => PaginatedMods)
@@ -74,7 +76,6 @@ export class ModResolver {
     }
 
     const mods = await Mod.find({
-      relations: ["likes"],
       where,
       order: { createdAt: "DESC" },
       take: realLimit + 1, // Fetch an extra mod to see if there are additional ones for subsequent calls
@@ -88,7 +89,7 @@ export class ModResolver {
 
   @Query(() => Mod, { nullable: true })
   mod(@Arg("id", () => Int) id: number): Promise<Mod | undefined> {
-    return Mod.findOne({ where: { id }, relations: ["author", "likes"] });
+    return Mod.findOne({ where: { id } });
   }
 
   @Authorized()
@@ -97,30 +98,27 @@ export class ModResolver {
     @Arg("modId", () => Int) modId: number,
     @Ctx() { req }: Context
   ): Promise<boolean> {
-    const { userId: userIdThatLiked } = req.session;
-    const userThatLiked = await User.findOne(userIdThatLiked);
-    const modToLike = await Mod.findOne(modId, { relations: ["likes"] });
+    const { userId } = req.session;
+    const modToLike = await Mod.findOne(modId);
 
     if (!modToLike) {
       throw new Error("That mod does not exist.");
     }
 
     // Owner cannot like his own mod
-    if (userIdThatLiked === modToLike.authorId) return false;
+    if (userId === modToLike.authorId) return false;
 
-    const userHasAlreadyLiked = modToLike.likes?.find(
-      (user) => user.id === userIdThatLiked
-    );
+    const userHasAlreadyLiked = !!(await Like.findOne({
+      where: { userId, modId },
+    }));
 
+    // If user calls this mutation when they've already liked the mod
+    //   it means they want to unlike the mod
     if (userHasAlreadyLiked) {
-      modToLike.likes = modToLike.likes!.filter(
-        (user) => user.id !== userIdThatLiked
-      );
+      Like.delete({ userId, modId });
     } else {
-      modToLike.likes = [...(modToLike.likes ?? []), userThatLiked!];
+      Like.create({ userId, modId }).save();
     }
-
-    modToLike.save();
 
     return true;
   }
