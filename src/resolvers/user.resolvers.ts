@@ -9,6 +9,7 @@ import {
 } from "type-graphql";
 import argon2 from "argon2";
 import { v4 } from "uuid";
+import { getConnection } from "typeorm";
 
 import { User } from "../entities/User";
 import {
@@ -19,6 +20,7 @@ import {
 import { Context } from "../types";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import sendEmail from "../utils/sendEmail";
+import { Mod } from "../entities/Mod";
 
 @Resolver(User)
 export class UserResolver {
@@ -31,13 +33,33 @@ export class UserResolver {
     return root.email;
   }
 
+  @FieldResolver(() => [Mod])
+  async likedMods(@Ctx() { req }: Context): Promise<Mod[]> {
+    const likedMods = (await getConnection().query(
+      `
+      SELECT mods.* 
+      FROM likes
+      LEFT JOIN mods
+      ON likes."modId" = mods.id
+      WHERE likes."userId" = $1
+    `,
+      [req.session.userId]
+    )) as Mod[];
+
+    return likedMods;
+  }
+
+  @FieldResolver(() => [Mod])
+  async mods(@Ctx() { req }: Context): Promise<Mod[]> {
+    return Mod.find({ where: { authorId: req.session.userId } });
+  }
+
   @Query(() => User, { nullable: true })
   me(@Ctx() { req }: Context) {
     if (!req.session.userId) return undefined;
 
     return User.findOne({
       where: { id: req.session.userId },
-      relations: ["likedMods", "mods"],
     });
   }
 
