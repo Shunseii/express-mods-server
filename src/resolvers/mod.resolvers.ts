@@ -31,25 +31,34 @@ export class ModResolver {
   }
 
   @FieldResolver(() => User)
-  async author(@Root() root: Mod): Promise<User> {
+  async author(
+    @Root() root: Mod,
+    @Ctx() { userLoader }: Context
+  ): Promise<User> {
     // By construction, every mod must have an author
-    // hence we are required to assert that the user exists
-    return (await User.findOne(root.authorId))!;
+    //   hence we can assert that the user exists
+    return userLoader.load(root.authorId);
   }
 
   @FieldResolver(() => Int)
-  async likesCount(@Root() root: Mod): Promise<number> {
-    const likes = await Like.find({ where: { modId: root.id } });
-
-    return likes.length;
+  async likesCount(
+    @Root() root: Mod,
+    @Ctx() { likesCountLoader }: Context
+  ): Promise<number> {
+    return likesCountLoader.load(root.id);
   }
 
   @FieldResolver(() => Boolean)
-  async hasLiked(@Root() root: Mod, @Ctx() { req }: Context): Promise<boolean> {
+  async hasLiked(
+    @Root() root: Mod,
+    @Ctx() { req, likeLoader }: Context
+  ): Promise<boolean> {
     const { userId } = req.session;
     const { id: modId } = root;
 
-    const userHasLiked = await Like.findOne({ where: { userId, modId } });
+    if (!userId) return false;
+
+    const userHasLiked = await likeLoader.load({ userId, modId });
 
     return !!userHasLiked;
   }
@@ -172,6 +181,7 @@ export class ModResolver {
   ): Promise<boolean> {
     await Like.delete({ modId: id });
     await Mod.delete({ id, authorId: req.session.userId });
+
     return true;
   }
 }
