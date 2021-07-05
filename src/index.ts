@@ -11,6 +11,7 @@ import cors from "cors";
 
 import { UserResolver } from "./resolvers/user.resolvers";
 import { ModResolver } from "./resolvers/mod.resolvers";
+import { GameResolver } from "./resolvers/game.resolvers";
 import {
   IS_PROD,
   PORT,
@@ -21,7 +22,9 @@ import {
 } from "./constants";
 import { Context } from "./types";
 import authChecker from "./auth/authChecker";
-import { GameResolver } from "./resolvers/game.resolvers";
+import createUserLoader from "./utils/createUserLoader";
+import createLikeLoader from "./utils/createLikeLoader";
+import createLikesCountLoader from "./utils/createLikesCountLoader";
 
 (async () => {
   const conn = await createConnection();
@@ -65,7 +68,14 @@ import { GameResolver } from "./resolvers/game.resolvers";
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req, res }): Context => ({ req, res, redis }),
+    context: ({ req, res }): Context => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+      likeLoader: createLikeLoader(),
+      likesCountLoader: createLikesCountLoader(),
+    }),
   });
 
   apolloServer.applyMiddleware({
