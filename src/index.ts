@@ -9,9 +9,6 @@ import Redis from "ioredis";
 import connectRedis from "connect-redis";
 import cors from "cors";
 
-import { UserResolver } from "./resolvers/user.resolvers";
-import { ModResolver } from "./resolvers/mod.resolvers";
-import { GameResolver } from "./resolvers/game.resolvers";
 import {
   IS_PROD,
   PORT,
@@ -25,6 +22,10 @@ import authChecker from "./auth/authChecker";
 import createUserLoader from "./utils/createUserLoader";
 import createLikeLoader from "./utils/createLikeLoader";
 import createLikesCountLoader from "./utils/createLikesCountLoader";
+import { CommentResolver } from "./resolvers/comment.resolvers";
+import { UserResolver } from "./resolvers/user.resolvers";
+import { ModResolver } from "./resolvers/mod.resolvers";
+import { GameResolver } from "./resolvers/game.resolvers";
 
 (async () => {
   const conn = await createConnection();
@@ -61,7 +62,7 @@ import createLikesCountLoader from "./utils/createLikesCountLoader";
   );
 
   const schema = await buildSchema({
-    resolvers: [UserResolver, ModResolver, GameResolver],
+    resolvers: [UserResolver, ModResolver, GameResolver, CommentResolver],
     authChecker,
     emitSchemaFile: true,
   });

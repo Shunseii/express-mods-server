@@ -9,6 +9,7 @@ import {
   OneToMany,
 } from "typeorm";
 
+import { Comment } from "./Comment";
 import { Like } from "./Like";
 import { Mod } from "./Mod";
 
@@ -41,6 +42,10 @@ export class User extends BaseEntity {
   @Field(() => [Mod], { nullable: true })
   @OneToMany(() => Mod, (mod) => mod.author)
   mods?: Mod[];
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(() => Comment, (comment) => comment.author)
+  comments?: Comment[];
 
   @Field(() => [Mod], { nullable: true })
   @OneToMany(() => Like, (like) => like.user)
