@@ -21,6 +21,7 @@ import { Context } from "../types";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import sendEmail from "../utils/sendEmail";
 import { Mod } from "../entities/Mod";
+import { Comment } from "../entities/Comment";
 
 @Resolver(User)
 export class UserResolver {
@@ -31,6 +32,11 @@ export class UserResolver {
     }
 
     return root.email;
+  }
+
+  @FieldResolver(() => [Comment])
+  async comments(@Root() root: User): Promise<Comment[]> {
+    return Comment.find({ where: { userId: root.id } });
   }
 
   @FieldResolver(() => [Mod])

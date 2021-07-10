@@ -13,6 +13,7 @@ import {
 import { Game } from "./Game";
 import { Like } from "./Like";
 import { User } from "./User";
+import { Comment } from "./Comment";
 
 @ObjectType()
 @Entity("mods")
@@ -47,6 +48,10 @@ export class Mod extends BaseEntity {
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.mods)
   author!: User;
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(() => Comment, (comment) => comment.mod)
+  comments?: Comment[];
 
   @Field(() => Int)
   @Column()

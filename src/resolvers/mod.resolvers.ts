@@ -17,6 +17,7 @@ import { Context } from "../types";
 import { Game } from "../entities/Game";
 import { User } from "../entities/User";
 import { Like } from "../entities/Like";
+import { Comment } from "../entities/Comment";
 
 @Resolver(Mod)
 export class ModResolver {
@@ -35,8 +36,6 @@ export class ModResolver {
     @Root() root: Mod,
     @Ctx() { userLoader }: Context
   ): Promise<User> {
-    // By construction, every mod must have an author
-    //   hence we can assert that the user exists
     return userLoader.load(root.authorId);
   }
 
@@ -61,6 +60,11 @@ export class ModResolver {
     const userHasLiked = await likeLoader.load({ userId, modId });
 
     return !!userHasLiked;
+  }
+
+  @FieldResolver(() => [Comment])
+  async comments(@Root() root: Mod): Promise<Comment[]> {
+    return Comment.find({ where: { modId: root.id } });
   }
 
   @Query(() => PaginatedMods)
