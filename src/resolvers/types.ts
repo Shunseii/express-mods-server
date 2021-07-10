@@ -76,3 +76,23 @@ export class UpdateModInput {
   @MinLength(16, { message: TOO_SHORT })
   content?: string;
 }
+
+@InputType()
+export class CreateCommentInput {
+  @Field()
+  @MinLength(1, { message: TOO_SHORT })
+  content!: string;
+
+  @Field()
+  modId!: number;
+}
+
+@InputType()
+export class UpdateCommentInput {
+  @Field()
+  id!: number;
+
+  @Field()
+  @MinLength(1, { message: TOO_SHORT })
+  content!: string;
+}

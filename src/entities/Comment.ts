@@ -9,6 +9,7 @@ import {
   Column,
 } from "typeorm";
 
+import { Mod } from "./Mod";
 import { User } from "./User";
 
 @ObjectType()
@@ -25,6 +26,18 @@ export class Comment extends BaseEntity {
   @Field()
   @UpdateDateColumn({ type: "timestamptz" })
   updatedAt!: Date;
+
+  @Field()
+  @Column()
+  content!: string;
+
+  @Field(() => Int)
+  @Column()
+  modId!: number;
+
+  @Field(() => Mod)
+  @ManyToOne(() => Mod, (mod) => mod.comments)
+  mod!: Mod;
 
   @Field(() => Int)
   @Column()
