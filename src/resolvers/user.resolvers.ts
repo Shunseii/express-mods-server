@@ -36,7 +36,7 @@ export class UserResolver {
 
   @FieldResolver(() => [Comment])
   async comments(@Root() root: User): Promise<Comment[]> {
-    return Comment.find({ where: { userId: root.id } });
+    return Comment.find({ where: { authorId: root.id } });
   }
 
   @FieldResolver(() => [Mod])
