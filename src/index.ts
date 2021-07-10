@@ -26,6 +26,7 @@ import { CommentResolver } from "./resolvers/comment.resolvers";
 import { UserResolver } from "./resolvers/user.resolvers";
 import { ModResolver } from "./resolvers/mod.resolvers";
 import { GameResolver } from "./resolvers/game.resolvers";
+import createModLoader from "./utils/createModLoader";
 
 (async () => {
   const conn = await createConnection();
@@ -74,6 +75,7 @@ import { GameResolver } from "./resolvers/game.resolvers";
       res,
       redis,
       userLoader: createUserLoader(),
+      modLoader: createModLoader(),
       likeLoader: createLikeLoader(),
       likesCountLoader: createLikesCountLoader(),
     }),
