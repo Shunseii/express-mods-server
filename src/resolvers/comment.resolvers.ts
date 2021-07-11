@@ -2,18 +2,29 @@ import {
   Arg,
   Authorized,
   Ctx,
+  FieldResolver,
   Int,
   Mutation,
   Query,
   Resolver,
+  Root,
 } from "type-graphql";
 
 import { Comment } from "../entities/Comment";
+import { User } from "../entities/User";
 import { Context } from "../types";
 import { CreateCommentInput, UpdateCommentInput } from "./types";
 
 @Resolver(Comment)
 export class CommentResolver {
+  @FieldResolver(() => User)
+  async author(
+    @Root() root: Comment,
+    @Ctx() { userLoader }: Context
+  ): Promise<User | undefined> {
+    return userLoader.load(root.authorId);
+  }
+
   @Query(() => Comment, { nullable: true })
   async comment(@Arg("id") id: number): Promise<Comment | undefined> {
     return Comment.findOne(id);
