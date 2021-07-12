@@ -83,13 +83,13 @@ export class CreateCommentInput {
   @MinLength(1, { message: TOO_SHORT })
   content!: string;
 
-  @Field()
+  @Field(() => Int)
   modId!: number;
 }
 
 @InputType()
 export class UpdateCommentInput {
-  @Field()
+  @Field(() => Int)
   id!: number;
 
   @Field()
