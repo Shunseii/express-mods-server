@@ -5,10 +5,12 @@
   "username": "postgres",
   "password": "postgres",
   "database": "express-mods",
-  "synchronize": true,
+  "synchronize": false,
   "logging": false,
   "entities": ["build/entities/**/*.*"],
   "migrations": ["build/migrations/**/*.*"],
+  "seeds": ["build/seeds/**/*{.ts,.js}"],
+  "factories": ["build/factories/**/*{.ts,.js}"],
   "cli": {
     "migrationsDir": "src/migrations"
   }
