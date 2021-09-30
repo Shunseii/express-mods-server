@@ -6,13 +6,13 @@ import { User } from "./User";
 @Entity("likes")
 export class Like extends BaseEntity {
   @PrimaryColumn()
-  userId!: number;
+  userId!: string;
 
   @ManyToOne(() => User, (user) => user.likedMods)
   user!: User;
 
   @PrimaryColumn()
-  modId!: number;
+  modId!: string;
 
   @ManyToOne(() => Mod, (mod) => mod.likes)
   mod!: Mod;

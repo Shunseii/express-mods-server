@@ -1,4 +1,5 @@
-import { ObjectType, Field, Int } from "type-graphql";
+import argon2 from "argon2";
+import { ObjectType, Field } from "type-graphql";
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,6 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  BeforeInsert,
 } from "typeorm";
 
 import { Comment } from "./Comment";
@@ -16,9 +18,9 @@ import { Mod } from "./Mod";
 @ObjectType()
 @Entity("users")
 export class User extends BaseEntity {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @Field()
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Field()
   @CreateDateColumn({ type: "timestamptz" })
@@ -50,4 +52,9 @@ export class User extends BaseEntity {
   @Field(() => [Mod], { nullable: true })
   @OneToMany(() => Like, (like) => like.user)
   likedMods?: Like[];
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await argon2.hash(this.password);
+  }
 }

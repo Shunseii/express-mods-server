@@ -78,14 +78,10 @@ export class UserResolver {
     const userId = await redis.get(key);
     if (!userId) return undefined;
 
-    const userIdInt = parseInt(userId);
-    const user = await User.findOne(userIdInt);
+    const user = await User.findOne(userId);
     if (!user) return undefined;
 
-    User.update(
-      { id: userIdInt },
-      { password: await argon2.hash(newPassword) }
-    );
+    User.update({ id: userId }, { password: newPassword });
 
     await redis.del(key);
     req.session.userId = user.id;
@@ -125,11 +121,10 @@ export class UserResolver {
     @Arg("options") { username, email, password }: RegisterUserInput,
     @Ctx() { req }: Context
   ): Promise<User> {
-    const hashedPassword = await argon2.hash(password);
     const user = await User.create({
       username,
       email,
-      password: hashedPassword,
+      password,
     }).save();
 
     req.session.userId = user.id;

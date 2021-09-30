@@ -2,7 +2,6 @@ import { Field, InputType, Int, ObjectType } from "type-graphql";
 import { IsEmail, MinLength, Length } from "class-validator";
 
 import { IsUserFieldNotInUse } from "../decorators/IsUserFieldNotInUse";
-import { IsModFieldNotInUse } from "../decorators/IsModFieldNotInUse";
 import { INVALID_EMAIL, INVALID_LENGTH, TOO_SHORT } from "./messages";
 import { Mod } from "../entities/Mod";
 
@@ -65,8 +64,8 @@ export class CreateModInput {
 
 @InputType()
 export class UpdateModInput {
-  @Field(() => Int)
-  id!: number;
+  @Field()
+  id!: string;
 
   @Field({ nullable: true })
   @Length(4, 255, { message: INVALID_LENGTH })
@@ -83,14 +82,14 @@ export class CreateCommentInput {
   @MinLength(1, { message: TOO_SHORT })
   content!: string;
 
-  @Field(() => Int)
-  modId!: number;
+  @Field()
+  modId!: string;
 }
 
 @InputType()
 export class UpdateCommentInput {
-  @Field(() => Int)
-  id!: number;
+  @Field()
+  id!: string;
 
   @Field()
   @MinLength(1, { message: TOO_SHORT })

@@ -8,7 +8,7 @@ import createUserLoader from "./utils/createUserLoader";
 
 declare module "express-session" {
   interface SessionData {
-    userId?: number;
+    userId?: string;
   }
 }
 

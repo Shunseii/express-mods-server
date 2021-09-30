@@ -13,9 +13,9 @@ import { Mod } from "./Mod";
 @ObjectType()
 @Entity("games")
 export class Game extends BaseEntity {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @Field()
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Field()
   @CreateDateColumn({ type: "timestamptz" })

@@ -108,7 +108,7 @@ export class ModResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async likeMod(
-    @Arg("modId", () => Int) modId: number,
+    @Arg("modId", () => String) modId: string,
     @Ctx() { req }: Context
   ): Promise<boolean> {
     const { userId } = req.session;
@@ -180,7 +180,7 @@ export class ModResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async deleteMod(
-    @Arg("id", () => Int) id: number,
+    @Arg("id", () => String) id: string,
     @Ctx() { req }: Context
   ): Promise<boolean> {
     await Like.delete({ modId: id });

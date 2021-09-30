@@ -18,9 +18,9 @@ import { Comment } from "./Comment";
 @ObjectType()
 @Entity("mods")
 export class Mod extends BaseEntity {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @Field()
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Field()
   @CreateDateColumn({ type: "timestamptz" })
@@ -38,12 +38,16 @@ export class Mod extends BaseEntity {
   @Column()
   content!: string;
 
+  @Field(() => [String])
+  @Column("text", { array: true, default: () => "array[]::text[]" })
+  images!: string[];
+
   @OneToMany(() => Like, (like) => like.mod)
   likes?: Like[];
 
-  @Field(() => Int)
+  @Field()
   @Column()
-  authorId!: number;
+  authorId!: string;
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.mods)
@@ -53,9 +57,9 @@ export class Mod extends BaseEntity {
   @OneToMany(() => Comment, (comment) => comment.mod)
   comments?: Comment[];
 
-  @Field(() => Int)
+  @Field()
   @Column()
-  gameId!: number;
+  gameId!: string;
 
   @ManyToOne(() => Game, (game) => game.mods)
   game!: Game;

@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from "type-graphql";
+import { Field, ObjectType } from "type-graphql";
 import {
   Entity,
   BaseEntity,
@@ -15,9 +15,9 @@ import { User } from "./User";
 @ObjectType()
 @Entity("comments")
 export class Comment extends BaseEntity {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @Field()
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Field()
   @CreateDateColumn({ type: "timestamptz" })
@@ -31,17 +31,17 @@ export class Comment extends BaseEntity {
   @Column()
   content!: string;
 
-  @Field(() => Int)
+  @Field()
   @Column()
-  modId!: number;
+  modId!: string;
 
   @Field(() => Mod)
   @ManyToOne(() => Mod, (mod) => mod.comments)
   mod!: Mod;
 
-  @Field(() => Int)
+  @Field()
   @Column()
-  authorId!: number;
+  authorId!: string;
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.comments)

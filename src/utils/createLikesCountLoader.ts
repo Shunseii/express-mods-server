@@ -4,11 +4,11 @@ import { In } from "typeorm";
 import { Like } from "../entities/Like";
 
 const createLikesCountLoader = () =>
-  new DataLoader<number, number>(async (keys) => {
+  new DataLoader<string, number>(async (keys) => {
     const modLikes = await Like.find({
-      where: { modId: In(keys as number[]) },
+      where: { modId: In(keys as string[]) },
     });
-    const likesCounts: Record<number, number> = {};
+    const likesCounts: Record<string, number> = {};
 
     modLikes.forEach((like) => {
       likesCounts[like.modId] =

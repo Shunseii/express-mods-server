@@ -3,9 +3,9 @@ import DataLoader from "dataloader";
 import { User } from "../entities/User";
 
 const createUserLoader = () =>
-  new DataLoader<number, User>(async (keys) => {
-    const users = await User.findByIds(keys as number[]);
-    const userIdToUser: Record<number, User> = {};
+  new DataLoader<string, User>(async (keys) => {
+    const users = await User.findByIds(keys as string[]);
+    const userIdToUser: Record<string, User> = {};
 
     // Orders the elements according to the userId
     //   which is required for the batch fn return value

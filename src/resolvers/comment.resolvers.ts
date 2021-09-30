@@ -25,6 +25,13 @@ export class CommentResolver {
     return userLoader.load(root.authorId);
   }
 
+  @FieldResolver(() => Boolean)
+  isOwner(@Root() root: Comment, @Ctx() { req }: Context): boolean {
+    const currentUserId = req.session.userId;
+
+    return root.authorId === currentUserId;
+  }
+
   @Query(() => Comment, { nullable: true })
   async comment(@Arg("id") id: number): Promise<Comment | undefined> {
     return Comment.findOne(id);
@@ -68,7 +75,7 @@ export class CommentResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async deleteComment(
-    @Arg("id", () => Int) id: number,
+    @Arg("id", () => String) id: string,
     @Ctx() { req }: Context
   ): Promise<boolean> {
     await Comment.delete({ id, authorId: req.session.userId });
