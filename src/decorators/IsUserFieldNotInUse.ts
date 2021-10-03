@@ -10,7 +10,8 @@ import { User } from "../entities/User";
 
 @ValidatorConstraint({ async: true })
 export class IsUserFieldNotInUseConstraint
-  implements ValidatorConstraintInterface {
+  implements ValidatorConstraintInterface
+{
   validate(fieldValue: string, args: ValidationArguments) {
     return User.findOne({ where: { [args.property]: fieldValue } }).then(
       (user) => {
@@ -21,7 +22,7 @@ export class IsUserFieldNotInUseConstraint
     );
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return "This $property already exists.";
   }
 }

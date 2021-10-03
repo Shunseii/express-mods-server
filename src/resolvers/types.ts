@@ -1,9 +1,11 @@
-import { Field, InputType, Int, ObjectType } from "type-graphql";
+import { Field, InputType, ObjectType } from "type-graphql";
 import { IsEmail, MinLength, Length } from "class-validator";
+import { GraphQLUpload } from "graphql-upload";
 
 import { IsUserFieldNotInUse } from "../decorators/IsUserFieldNotInUse";
 import { INVALID_EMAIL, INVALID_LENGTH, TOO_SHORT } from "./messages";
 import { Mod } from "../entities/Mod";
+import { UploadedFile } from "../types";
 
 @ObjectType()
 export class PaginatedMods {
@@ -60,6 +62,15 @@ export class CreateModInput {
 
   @Field()
   gameSlug!: string;
+}
+
+@InputType()
+export class UploadImageInput {
+  @Field()
+  modId!: string;
+
+  @Field(() => GraphQLUpload)
+  imageFile!: UploadedFile;
 }
 
 @InputType()

@@ -156,7 +156,8 @@ export class UserResolver {
         res.clearCookie(COOKIE_NAME);
 
         if (err) {
-          console.log(err);
+          console.error(`Error logging out user ${err}`);
+
           resolve(false);
           return;
         }

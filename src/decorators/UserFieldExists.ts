@@ -20,7 +20,7 @@ export class UserFieldExistsConstraint implements ValidatorConstraintInterface {
     );
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return "This $property does not exist.";
   }
 }

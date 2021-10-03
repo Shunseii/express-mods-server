@@ -3,7 +3,6 @@ import {
   Authorized,
   Ctx,
   FieldResolver,
-  Int,
   Mutation,
   Query,
   Resolver,

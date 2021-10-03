@@ -10,7 +10,8 @@ import { Mod } from "../entities/Mod";
 
 @ValidatorConstraint({ async: true })
 export class IsModFieldNotInUseConstraint
-  implements ValidatorConstraintInterface {
+  implements ValidatorConstraintInterface
+{
   validate(fieldValue: string, args: ValidationArguments) {
     return Mod.findOne({ where: { [args.property]: fieldValue } }).then(
       (mod) => {
@@ -21,7 +22,7 @@ export class IsModFieldNotInUseConstraint
     );
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return "This $property already exists.";
   }
 }

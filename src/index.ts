@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import "dotenv-safe/config";
 
 import express from "express";
 import { createConnection } from "typeorm";
@@ -8,25 +9,20 @@ import session from "express-session";
 import Redis from "ioredis";
 import connectRedis from "connect-redis";
 import cors from "cors";
+import { graphqlUploadExpress } from "graphql-upload";
 
-import {
-  IS_PROD,
-  PORT,
-  COOKIE_NAME,
-  COOKIE_MAX_AGE,
-  COOKIE_SECRET,
-  FRONT_END_URL,
-} from "./constants";
+import { IS_PROD, COOKIE_NAME, COOKIE_MAX_AGE } from "./constants";
 import { Context } from "./types";
 import authChecker from "./auth/authChecker";
-import createUserLoader from "./utils/createUserLoader";
-import createLikeLoader from "./utils/createLikeLoader";
-import createLikesCountLoader from "./utils/createLikesCountLoader";
+import createUserLoader from "./dataloaders/createUserLoader";
+import createLikeLoader from "./dataloaders/createLikeLoader";
+import createLikesCountLoader from "./dataloaders/createLikesCountLoader";
 import { CommentResolver } from "./resolvers/comment.resolvers";
 import { UserResolver } from "./resolvers/user.resolvers";
 import { ModResolver } from "./resolvers/mod.resolvers";
 import { GameResolver } from "./resolvers/game.resolvers";
-import createModLoader from "./utils/createModLoader";
+import createModLoader from "./dataloaders/createModLoader";
+import { s3Client } from "./utils/createS3Client";
 
 (async () => {
   const conn = await createConnection();
@@ -34,12 +30,12 @@ import createModLoader from "./utils/createModLoader";
 
   const app = express();
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
 
   app.use(
     cors({
       credentials: true,
-      origin: FRONT_END_URL,
+      origin: process.env.CORS_ORIGIN,
     })
   );
 
@@ -56,7 +52,7 @@ import createModLoader from "./utils/createModLoader";
         sameSite: "lax", // csrf
         secure: IS_PROD,
       },
-      secret: COOKIE_SECRET,
+      secret: process.env.COOKIE_SECRET,
       saveUninitialized: false,
       resave: false,
     })
@@ -74,6 +70,7 @@ import createModLoader from "./utils/createModLoader";
       req,
       res,
       redis,
+      s3Client: s3Client,
       userLoader: createUserLoader(),
       modLoader: createModLoader(),
       likeLoader: createLikeLoader(),
@@ -81,12 +78,16 @@ import createModLoader from "./utils/createModLoader";
     }),
   });
 
+  app.use(graphqlUploadExpress());
+
+  await apolloServer.start();
+
   apolloServer.applyMiddleware({
     app,
     cors: false,
   });
 
-  app.listen(PORT, () => {
-    console.log(`Server started on port ${PORT}.`);
+  app.listen(process.env.PORT, () => {
+    console.log(`Server started on port ${process.env.PORT}.`);
   });
 })();

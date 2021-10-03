@@ -8,8 +8,7 @@ export const TOO_SHORT = ({ constraints }: ValidationArguments) =>
 export const TOO_LONG = ({ constraints }: ValidationArguments) =>
   `Must be at most ${constraints[0]} characters.`;
 
-export const INVALID_EMAIL = (args: ValidationArguments) =>
-  `This is not a valid email`;
+export const INVALID_EMAIL = () => `This is not a valid email`;
 
 export const INVALID_LENGTH = (args: ValidationArguments) => {
   const { value, constraints } = args;

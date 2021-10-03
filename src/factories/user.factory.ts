@@ -1,4 +1,3 @@
-import argon2 from "argon2";
 import { define } from "typeorm-seeding";
 
 import { User } from "../entities/User";
