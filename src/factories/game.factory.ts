@@ -2,8 +2,10 @@ import { define } from "typeorm-seeding";
 
 import { Game } from "../entities/Game";
 
-export interface GameFactoryContext
-  extends Pick<Game, "name" | "gameSlug" | "imageName" | "description"> {}
+export type GameFactoryContext = Pick<
+  Game,
+  "name" | "gameSlug" | "imageName" | "description"
+>;
 
 define<Game, GameFactoryContext>(Game, (faker, context) => {
   const game = new Game();
